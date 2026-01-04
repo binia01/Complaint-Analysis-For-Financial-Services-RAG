@@ -2,3 +2,4 @@ data/
 .venv/
 *.csv
 __pycache__/
+vector_store/
