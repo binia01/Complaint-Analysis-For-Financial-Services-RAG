@@ -9,6 +9,11 @@ This project is a data analysis pipeline designed to process, clean, and visuali
     *   Filters out missing narratives.
     *   Maps raw product names to simplified categories: 'Credit Cards', 'Savings Accounts', 'Personal Loans', and 'Money Transfers'.
     *   Cleans narrative text by removing redacted placeholders (e.g., 'XXXX'), special characters, and extra whitespace.
+*   **Data Sampling**:
+    *   Creates stratified samples to preserve the percentage distribution of products, ensuring representative subsets for computationally intensive tasks.
+*   **Vector Embedding Pipeline**:
+    *   Converts complaint narratives into vector embeddings using HuggingFace models (`all-MiniLM-L6-v2`).
+    *   Stores embeddings in a local ChromaDB vector store for semantic search and RAG (Retrieval-Augmented Generation) applications.
 *   **Exploratory Data Analysis (EDA)**:
     *   Visualizes the distribution of complaints by product.
     *   Analyzes and plots the distribution of word counts in complaint narratives.
@@ -20,11 +25,15 @@ This project is a data analysis pipeline designed to process, clean, and visuali
 │   ├── processed/          # Directory for storing processed data
 │   └── raw/                # Directory for raw input data (complaints.csv)
 ├── notebooks/
-│   └── task1_eda.ipynb     # Jupyter notebook for Exploratory Data Analysis
+│   ├── task1_eda.ipynb     # Jupyter notebook for Exploratory Data Analysis
+│   └── task2_embedding.ipynb # Jupyter notebook for Vector Embedding generation
 ├── src/
 │   ├── loader.py           # Module for loading data efficiently
 │   ├── preprocessor.py     # Module for cleaning and transforming data
+│   ├── sampler.py          # Module for creating stratified samples
+│   ├── vectorizer.py       # Module for creating vector embeddings and storing them
 │   └── visualizer.py       # Module for generating plots and visualizations
+├── vector_store/           # Directory for storing ChromaDB vector database
 ├── requirements.txt        # List of Python dependencies
 └── README.md               # Project documentation
 ```
@@ -64,12 +73,24 @@ This project is a data analysis pipeline designed to process, clean, and visuali
     ```
     Then navigate to `notebooks/task1_eda.ipynb` and run the cells.
 
+3.  **Generate Embeddings**:
+    Open the `notebooks/task2_embedding.ipynb` notebook. This notebook demonstrates how to:
+    *   Sample the dataset using `ComplaintSampler`.
+    *   Create a vector store using `VectorPipeline` (LangChain + ChromaDB).
+    *   Perform a semantic search query on the indexed complaints.
+
 ## Dependencies
 
 *   pandas
 *   numpy
 *   matplotlib
 *   seaborn
+*   langchain
+*   langchain-community
+*   langchain-huggingface
+*   langchain-chroma
+*   sentence-transformers
+*   chromadb
 
 ## Modules
 
@@ -81,6 +102,15 @@ Contains the `ComplaintPreprocessor` class, responsible for:
 *   Filtering missing values.
 *   Mapping specific financial products to broader categories.
 *   Text cleaning (lowercasing, removing special characters and redactions).
+
+### `src.sampler`
+Contains the `ComplaintSampler` class, which creates stratified samples of the dataset to ensure product distribution is preserved in smaller subsets.
+
+### `src.vectorizer`
+Contains the `VectorPipeline` class, which handles:
+*   Splitting text into chunks.
+*   Generating embeddings using HuggingFace models.
+*   Creating and persisting a ChromaDB vector store.
 
 ### `src.visualizer`
 Contains the `ComplaintVisualizer` class for generating charts such as product distribution bar charts and word count histograms.
