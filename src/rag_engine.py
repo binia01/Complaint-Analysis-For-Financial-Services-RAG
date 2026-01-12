@@ -56,8 +56,7 @@ class RAGPipeline:
         print("[RAG] Initializing Google Gemini...")
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
-            temperature=0,
-            max_output_tokens=500
+            temperature=0
         )
 
         # 5. Define Prompt & Chain
