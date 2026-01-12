@@ -35,7 +35,6 @@ This project is a data analysis pipeline designed to process, clean, and visuali
 │   ├── task2_embedding.ipynb     # Chunking + embedding + vector store build
 │   └── task3_evaluation.ipynb    # RAG evaluation loop
 ├── src/
-│   ├── app.py                    # Streamlit chat app (Task 4)
 │   ├── loader.py                 # Chunked CSV loader
 │   ├── preprocessor.py           # Cleaning + product mapping
 │   ├── rag_engine.py             # RAGPipeline used by evaluation and app
@@ -45,6 +44,7 @@ This project is a data analysis pipeline designed to process, clean, and visuali
 ├── chroma_db_full/               # Persisted Chroma store used by RAGPipeline
 ├── vector_store/                 # Vector store built in Task 2 notebook
 ├── requirements.txt              # Python dependencies
+|-- app.py                    # Streamlit chat app (Task 4)
 └── README.md                     # Project documentation
 ```
 
@@ -81,11 +81,11 @@ This project is a data analysis pipeline designed to process, clean, and visuali
 
 3.  **Run the Streamlit chat (Task 4)**:
 
-    The chat app in `src/app.py` wraps `RAGPipeline` for interactive Q&A with Gemini.
+    The chat app in `./app.py` wraps `RAGPipeline` for interactive Q&A with Gemini.
 
     ```bash
     export GOOGLE_API_KEY=<your_gemini_key>
-    streamlit run src/app.py
+    streamlit run ./app.py
     ```
 
     The app will reuse `data/raw/complaint_embeddings.parquet` and the `chroma_db_full/` store. Use the sidebar to enter a Google API key if it is not already exported.
@@ -134,5 +134,5 @@ Contains the `ComplaintVisualizer` class for generating charts such as product d
 ### `src.rag_engine`
 Contains the `RAGPipeline` class that wires the Chroma retriever, Gemini LLM, and prompt into a runnable chain. Used by the evaluation notebook and the Streamlit chat.
 
-### `src.app`
+### `app`
 Streamlit entry point for Task 4. Provides a chat UI, handles API key input, and surfaces retrieved source snippets for each response.
