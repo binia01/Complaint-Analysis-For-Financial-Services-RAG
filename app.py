@@ -1,10 +1,6 @@
 import streamlit as st
 import time
-import sys
 import os
-
-# --- PATH SETUP ---
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.rag_engine import RAGPipeline
 
