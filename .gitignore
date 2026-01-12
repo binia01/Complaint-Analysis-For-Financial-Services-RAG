@@ -3,3 +3,5 @@ data/
 *.csv
 __pycache__/
 vector_store/
+.env
+chroma_db_full/
