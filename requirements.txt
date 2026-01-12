@@ -8,5 +8,6 @@ langchain-huggingface
 langchain-chroma 
 sentence-transformers 
 chromadb
-langchain-gooogle-genai
+langchain-google-genai
 pyarrow
+streamlit
