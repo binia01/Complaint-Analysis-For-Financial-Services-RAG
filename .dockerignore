@@ -1,0 +1,35 @@
+# ── Git / VCS ─────────────────────────────────────────────────────────
+.git
+.gitignore
+
+# ── Python artefacts ──────────────────────────────────────────────────
+__pycache__
+*.py[cod]
+*.egg-info
+.venv
+venv
+
+# ── IDE / OS ──────────────────────────────────────────────────────────
+.vscode
+.idea
+*.swp
+.DS_Store
+
+# ── Notebooks (not needed at runtime) ─────────────────────────────────
+notebooks/
+.ipynb_checkpoints
+
+# ── Test suite (not needed in production image) ───────────────────────
+test/
+
+# ── Docs ──────────────────────────────────────────────────────────────
+README.md
+LICENSE
+
+# ── CI/CD ─────────────────────────────────────────────────────────────
+.github/
+
+# ── Misc ──────────────────────────────────────────────────────────────
+*.log
+pyproject.toml
+setup.cfg
