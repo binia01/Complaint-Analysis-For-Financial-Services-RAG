@@ -20,10 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ src/
 COPY app.py .
 
-# Copy data & vector stores expected at runtime
-# (only the lightweight DB directories — raw CSVs stay out via .dockerignore)
-COPY chroma_db_full/ chroma_db_full/
-COPY data/ data/
+# Data & vector stores are mounted at runtime to keep images small
 
 # Streamlit default port
 EXPOSE 8501
