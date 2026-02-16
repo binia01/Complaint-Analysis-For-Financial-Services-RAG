@@ -19,6 +19,11 @@ venv
 notebooks/
 .ipynb_checkpoints
 
+# ── Data stores (mount at runtime) ───────────────────────────────────
+data/
+chroma_db_full/
+vector_store/
+
 # ── Test suite (not needed in production image) ───────────────────────
 test/
 
