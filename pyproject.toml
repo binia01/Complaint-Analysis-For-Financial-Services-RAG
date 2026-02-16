@@ -1,0 +1,31 @@
+[project]
+name = "complaint-analysis"
+version = "1.0.0"
+description = "Complaint Analysis for Financial Services – CrediTrust AI Analyst"
+requires-python = ">=3.10"
+
+# ── Linting / Formatting ─────────────────────────────────────────────
+[tool.flake8]
+max-line-length = 99
+extend-ignore = ["E203", "W503"]
+exclude = [".venv", "venv", "__pycache__", "notebooks", "chroma_db_full", "vector_store"]
+
+[tool.isort]
+profile = "black"
+line_length = 99
+
+[tool.black]
+line-length = 99
+target-version = ["py310"]
+
+# ── Type-checking ─────────────────────────────────────────────────────
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+# ── Testing ───────────────────────────────────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = "-v --tb=short"
