@@ -1,8 +1,33 @@
-data/
-.venv/
-*.csv
+# ── Python ────────────────────────────────────────────────────────────
 __pycache__/
-vector_store/
-.env
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+
+# ── Data (large / generated) ─────────────────────────────────────────
+data/
+data/raw/complaints.csv
+data/raw/complaint_embeddings.parquet
 chroma_db_full/
-.streamlit/
+vector_store/
+
+# ── IDE / OS ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ── Secrets ───────────────────────────────────────────────────────────
+.env
+.streamlit/secrets.toml
+
+# ── Notebooks checkpoints ────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Docker / misc ─────────────────────────────────────────────────────
+*.log
