@@ -1,36 +1,40 @@
-import streamlit as st
-import time
+"""CrediTrust Streamlit chat application."""
+
 import os
+import time
+
+import streamlit as st
 
 from src.rag_engine import RAGPipeline
 
 # --- CONFIGURATION ---
-st.set_page_config(page_title="CrediTrust AI Analyst", page_icon="🏦", layout="wide")
+st.set_page_config(
+    page_title="CrediTrust AI Analyst", page_icon="🏦", layout="wide"
+)
 
 # --- HEADER & SIDEBAR ---
 st.title("🏦 CrediTrust Intelligent Complaint Analysis")
 
 with st.sidebar:
     st.header("Control Panel")
-    
-    # --- API KEY INPUT (Fixes the missing key error) ---
+
     # 1. Try to get from Environment
     api_key = os.environ.get("GOOGLE_API_KEY")
-    
+
     # 2. If not in Env, try Streamlit Secrets
     if not api_key and "GOOGLE_API_KEY" in st.secrets:
         api_key = st.secrets["GOOGLE_API_KEY"]
-    
+
     # 3. If still missing, ask User
     if not api_key:
         api_key = st.text_input("🔑 Enter Google API Key", type="password")
         if api_key:
-            os.environ["GOOGLE_API_KEY"] = api_key # Set it for the session
+            os.environ["GOOGLE_API_KEY"] = api_key  # Set it for the session
     else:
         st.success("API Key Detected ✅")
 
     st.markdown("---")
-    
+
     if st.button("🗑️ Reset Conversation", type="primary"):
         st.session_state.messages = []
         st.rerun()
@@ -40,16 +44,20 @@ with st.sidebar:
 
 # --- STOP IF NO KEY ---
 if not os.environ.get("GOOGLE_API_KEY"):
-    st.warning("⚠️ Please enter your Google API Key in the sidebar to continue.")
+    st.warning(
+        "⚠️ Please enter your Google API Key in the sidebar to continue."
+    )
     st.stop()
+
 
 # --- INITIALIZE RAG ENGINE ---
 @st.cache_resource
-def load_rag_engine():
+def load_rag_engine() -> RAGPipeline:
     return RAGPipeline(
         parquet_path="./data/complaint_embeddings.parquet",
-        vector_db_path="./chroma_db_full"
+        vector_db_path="./chroma_db_full",
     )
+
 
 try:
     with st.spinner("Initializing Knowledge Base..."):
@@ -78,7 +86,7 @@ if prompt := st.chat_input("Ask a question about customer complaints..."):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
-        
+
         with st.spinner("Analyzing complaints..."):
             try:
                 result = rag.answer_question(prompt)
@@ -93,18 +101,18 @@ if prompt := st.chat_input("Ask a question about customer complaints..."):
             time.sleep(0.05)
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
-        
+
         formatted_sources = []
         with st.expander("🔍 View Source Evidence (Verified Claims)"):
             for i, doc in enumerate(source_docs):
-                meta_date = doc.metadata.get('date', 'Unknown')
+                meta_date = doc.metadata.get("date", "Unknown")
                 content = doc.page_content
                 st.markdown(f"**Source {i+1}** (Date: {meta_date})")
                 st.info(content)
                 formatted_sources.append({"date": meta_date, "text": content})
 
     st.session_state.messages.append({
-        "role": "assistant", 
+        "role": "assistant",
         "content": full_response,
-        "sources": formatted_sources
+        "sources": formatted_sources,
     })
