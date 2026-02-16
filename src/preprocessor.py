@@ -1,51 +1,87 @@
-import pandas as pd
+"""Complaint text preprocessing and product mapping."""
+
+import logging
 import re
+from typing import Dict
+
+import pandas as pd
+
+logger = logging.getLogger(__name__)
+
+NARRATIVE_COLUMN = "Consumer complaint narrative"
+
+# CrediTrust product taxonomy
+PRODUCT_MAP: Dict[str, list[str]] = {
+    "Credit Cards": ["credit card", "prepaid card"],
+    "Savings Accounts": ["savings", "checking", "bank account"],
+    "Personal Loans": ["personal loan", "consumer loan", "installment loan"],
+    "Money Transfers": ["money transfer", "virtual currency"],
+}
+
 
 class ComplaintPreprocessor:
-    def __init__(self, df: pd.DataFrame):
+    """Clean, filter, and categorise complaint data."""
+
+    def __init__(self, df: pd.DataFrame) -> None:
         self.df = df
 
-    def filter_missing_narratives(self) -> 'ComplaintPreprocessor':
-        """Removes rows where the complaint narrative is empty."""
+    # ------------------------------------------------------------------
+    # Public pipeline steps (each returns *self* for chaining)
+    # ------------------------------------------------------------------
+
+    def filter_missing_narratives(self) -> "ComplaintPreprocessor":
+        """Remove rows where the complaint narrative is empty."""
         initial_count = len(self.df)
-        self.df = self.df.dropna(subset=['Consumer complaint narrative']).copy()
+        self.df = self.df.dropna(subset=[NARRATIVE_COLUMN]).copy()
         dropped = initial_count - len(self.df)
-        print(f"[Preprocessing] Dropped {dropped:,} rows missing narratives.")
+        logger.info("Dropped %s rows missing narratives.", f"{dropped:,}")
         return self
 
-    def _map_product_logic(self, product_name: str) -> str:
-        """Internal helper method for product taxonomy mapping."""
-        p = str(product_name).lower()
-        if 'credit card' in p or 'prepaid card' in p: return 'Credit Cards'
-        if 'savings' in p or 'checking' in p or 'bank account' in p: return 'Savings Accounts'
-        if 'personal loan' in p or 'consumer loan' in p or 'installment loan' in p: return 'Personal Loans'
-        if 'money transfer' in p or 'virtual currency' in p: return 'Money Transfers'
-        return 'Other'
-
-    def map_products(self) -> 'ComplaintPreprocessor':
-        """Applies CrediTrust specific product categorization."""
-        self.df['CrediTrust_Product'] = self.df['Product'].apply(self._map_product_logic)
-        # Filter out 'Other' immediately
-        self.df = self.df[self.df['CrediTrust_Product'] != 'Other'].copy()
-        print(f"[Preprocessing] Filtered to target product categories. Current rows: {len(self.df):,}")
+    def map_products(self) -> "ComplaintPreprocessor":
+        """Apply CrediTrust-specific product categorisation."""
+        self.df["CrediTrust_Product"] = self.df["Product"].apply(
+            self._map_product_logic
+        )
+        self.df = self.df[self.df["CrediTrust_Product"] != "Other"].copy()
+        logger.info(
+            "Filtered to target product categories. Rows: %s",
+            f"{len(self.df):,}",
+        )
         return self
 
-    def _clean_text_logic(self, text: str) -> str:
-        """Internal helper for regex text cleaning."""
-        if not isinstance(text, str): return ""
-        text = text.lower()
-        text = re.sub(r'x{2,}', '', text) # Remove redacted placeholders (XXXX)
-        text = re.sub(r'[^a-z0-9\s]', '', text) # Remove special chars
-        text = re.sub(r'\s+', ' ', text).strip() # Collapse whitespace
-        return text
-
-    def clean_narratives(self) -> 'ComplaintPreprocessor':
-        """Applies text cleaning to the narrative column."""
-        print("[Preprocessing] Cleaning text narratives (this may take a moment)...")
-        self.df['cleaned_narrative'] = self.df['Consumer complaint narrative'].apply(self._clean_text_logic)
-        self.df = self.df[self.df['cleaned_narrative'] != ""]
+    def clean_narratives(self) -> "ComplaintPreprocessor":
+        """Apply text cleaning to the narrative column."""
+        logger.info("Cleaning text narratives...")
+        self.df["cleaned_narrative"] = self.df[NARRATIVE_COLUMN].apply(
+            self._clean_text_logic
+        )
+        self.df = self.df[self.df["cleaned_narrative"] != ""]
         return self
 
     def get_data(self) -> pd.DataFrame:
-        """Returns the processed DataFrame."""
+        """Return the processed DataFrame."""
         return self.df
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _map_product_logic(product_name: str) -> str:
+        """Map a raw product name to the CrediTrust taxonomy."""
+        lower = str(product_name).lower()
+        for category, keywords in PRODUCT_MAP.items():
+            if any(kw in lower for kw in keywords):
+                return category
+        return "Other"
+
+    @staticmethod
+    def _clean_text_logic(text: str) -> str:
+        """Lowercase, strip redaction markers and special characters."""
+        if not isinstance(text, str):
+            return ""
+        text = text.lower()
+        text = re.sub(r"x{2,}", "", text)
+        text = re.sub(r"[^a-z0-9\s]", "", text)
+        text = re.sub(r"\s+", " ", text).strip()
+        return text

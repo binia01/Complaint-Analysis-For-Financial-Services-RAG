@@ -1,13 +1,26 @@
+# ── Core ──────────────────────────────────────────────────────────────
 pandas
 numpy
 matplotlib
 seaborn
-langchain 
-langchain-community 
-langchain-huggingface 
-langchain-chroma 
-sentence-transformers 
-chromadb
+
+# ── LangChain / RAG ──────────────────────────────────────────────────
+langchain
+langchain-community
+langchain-huggingface
+langchain-chroma
 langchain-google-genai
+sentence-transformers
+chromadb
+
+# ── Data / App ────────────────────────────────────────────────────────
 pyarrow
 streamlit
+
+# ── Dev / QA ──────────────────────────────────────────────────────────
+pytest>=7.0
+pytest-cov
+flake8
+mypy
+isort
+black
