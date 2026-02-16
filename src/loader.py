@@ -1,45 +1,74 @@
-import pandas as pd
+"""Chunked CSV loader for complaint data."""
+
+import logging
 import os
 from typing import List
 
+import pandas as pd
+
+logger = logging.getLogger(__name__)
+
+NARRATIVE_COLUMN = "Consumer complaint narrative"
+
+
 class ComplaintLoader:
-    def __init__(self, file_path: str, columns: List[str]):
+    """Load complaint CSV files in memory-efficient chunks."""
+
+    def __init__(
+        self,
+        file_path: str,
+        columns: List[str],
+        chunk_size: int = 50_000,
+    ) -> None:
         self.file_path = file_path
         self.columns = columns
+        self.chunk_size = chunk_size
 
     def load_data(self) -> pd.DataFrame:
-        """
-        Loads data in chunks to prevent Memory Errors (Kernel crash).
-        It immediately filters out rows without narratives to save RAM.
+        """Load data in chunks, filtering rows without narratives early.
+
+        Returns:
+            pd.DataFrame: DataFrame containing only rows with narratives.
+
+        Raises:
+            FileNotFoundError: If the source CSV does not exist.
+            IOError: If there is an error reading the CSV.
         """
         if not os.path.exists(self.file_path):
             raise FileNotFoundError(f"File not found at {self.file_path}")
-        
-        print(f"[Loader] Loading data from {self.file_path} in chunks...")
-        
-        chunk_size = 50000  # Process 50k rows at a time
-        chunks_list = []
-        
+
+        logger.info("Loading data from %s in chunks...", self.file_path)
+
+        chunks_list: List[pd.DataFrame] = []
+
         try:
-            # Create an iterator to read the file in pieces
-            with pd.read_csv(self.file_path, usecols=self.columns, chunksize=chunk_size, low_memory=False) as reader:
+            reader = pd.read_csv(
+                self.file_path,
+                usecols=self.columns,
+                chunksize=self.chunk_size,
+                low_memory=False,
+            )
+            with reader:
                 for i, chunk in enumerate(reader):
-                    # OPTIMIZATION: Drop rows with missing narratives IMMEDIATELY
-                    # This dramatically reduces memory usage before we combine everything
-                    clean_chunk = chunk.dropna(subset=['Consumer complaint narrative'])
-                    
+                    clean_chunk = chunk.dropna(subset=[NARRATIVE_COLUMN])
                     if not clean_chunk.empty:
                         chunks_list.append(clean_chunk)
-                    
-                    # Optional: Print progress every 10 chunks
                     if i % 10 == 0:
-                        print(f"  Processed chunk {i}...")
+                        logger.debug("Processed chunk %d", i)
 
-            print("[Loader] Concatenating valid chunks...")
-            df = pd.concat(chunks_list, axis=0, ignore_index=True)
-            
-            print(f"[Loader] Successfully loaded {len(df):,} rows with narratives.")
+            if not chunks_list:
+                return pd.DataFrame(columns=self.columns)
+
+            logger.info("Concatenating valid chunks...")
+            df: pd.DataFrame = pd.concat(
+                chunks_list, axis=0, ignore_index=True
+            )
+
+            logger.info(
+                "Successfully loaded %s rows with narratives.",
+                f"{len(df):,}",
+            )
             return df
 
-        except Exception as e:
-            raise IOError(f"Error reading CSV: {e}")
+        except Exception as exc:
+            raise IOError(f"Error reading CSV: {exc}") from exc
