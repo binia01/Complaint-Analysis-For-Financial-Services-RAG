@@ -95,11 +95,15 @@ docker build -t creditrust-analyst:latest .
 
 ### Run the container
 
+Mount the data and vector store directories so the image stays small.
+
 ```bash
 docker run -d \
   --name creditrust \
   -p 8501:8501 \
   -e GOOGLE_API_KEY=<your_key> \
+  -v "$(pwd)/data:/app/data" \
+  -v "$(pwd)/chroma_db_full:/app/chroma_db_full" \
   creditrust-analyst:latest
 ```
 
