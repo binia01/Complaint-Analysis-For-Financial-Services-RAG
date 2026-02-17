@@ -1,6 +1,5 @@
 """Tests for src.rag_engine.RAGPipeline (using mocks for external services)."""
 
-import os
 from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
 
